@@ -337,17 +337,9 @@ make
 
 Contributions are welcome! Please feel free to submit pull requests for bug fixes and new features.
 
-## License
-
-See license.txt for details.
-
 ## Credits
 
 - Original Seatest framework by Keith Nicholas
-- STest by Jia Tan
-- Enhanced and improved by Mehdi
-
-## Version History
 
 ### Version 2.0.0 (Current)
 - Added test timing and performance metrics
@@ -357,6 +349,3 @@ See license.txt for details.
 - Added assertion counting
 - Improved error messages and statistics
 - Enhanced documentation
-
-### Version 1.0.0
-- Initial release based on STest
