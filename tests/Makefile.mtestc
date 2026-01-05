@@ -8,9 +8,9 @@ LDFLAGS = -L../src/liblzma/.libs -llzma -lm
 MTESTC_DIR = mtestc
 MTESTC_LIB = $(MTESTC_DIR)/libstest.a
 
-TEST_SRC = test_new_features.c test_complex_features.c
-TEST_OBJ = test_new_features.o test_complex_features.o
-TEST_BIN = test_new_features test_complex_features
+TEST_SRC = test_new_features.c test_complex_features.c test_smart_compress.c
+TEST_OBJ = test_new_features.o test_complex_features.o test_smart_compress.o
+TEST_BIN = test_new_features test_complex_features test_smart_compress
 
 # Source files for new features
 ADAPTIVE_SRC = ../src/xz/adaptive.c
@@ -19,6 +19,7 @@ INTEGRITY_SRC = ../src/xz/integrity.c
 PARALLEL_SRC = ../src/xz/parallel.c
 OPTIMIZER_SRC = ../src/xz/optimizer.c
 RECOVERY_SRC = ../src/xz/recovery.c
+SMART_COMPRESS_SRC = ../src/xz/smart_compress.c
 
 ADAPTIVE_OBJ = adaptive.o
 ANALYTICS_OBJ = analytics.o
@@ -26,11 +27,12 @@ INTEGRITY_OBJ = integrity.o
 PARALLEL_OBJ = parallel.o
 OPTIMIZER_OBJ = optimizer.o
 RECOVERY_OBJ = recovery.o
+SMART_COMPRESS_OBJ = smart_compress.o
 
 OBJS = $(TEST_OBJ) $(ADAPTIVE_OBJ) $(ANALYTICS_OBJ) $(INTEGRITY_OBJ) \
-       $(PARALLEL_OBJ) $(OPTIMIZER_OBJ) $(RECOVERY_OBJ)
+       $(PARALLEL_OBJ) $(OPTIMIZER_OBJ) $(RECOVERY_OBJ) $(SMART_COMPRESS_OBJ)
 
-all: $(MTESTC_LIB) test_new_features test_complex_features
+all: $(MTESTC_LIB) test_new_features test_complex_features test_smart_compress
 
 $(MTESTC_LIB):
 	$(MAKE) -C $(MTESTC_DIR)
@@ -40,6 +42,9 @@ test_new_features: test_new_features.o $(ADAPTIVE_OBJ) $(ANALYTICS_OBJ) $(INTEGR
 
 test_complex_features: test_complex_features.o $(PARALLEL_OBJ) $(OPTIMIZER_OBJ) $(RECOVERY_OBJ) $(ADAPTIVE_OBJ) $(MTESTC_LIB)
 	$(CC) $(CFLAGS) -o test_complex_features test_complex_features.o $(PARALLEL_OBJ) $(OPTIMIZER_OBJ) $(RECOVERY_OBJ) $(ADAPTIVE_OBJ) $(MTESTC_LIB) $(LDFLAGS)
+
+test_smart_compress: test_smart_compress.o $(SMART_COMPRESS_OBJ) $(ADAPTIVE_OBJ) $(OPTIMIZER_OBJ) $(PARALLEL_OBJ) $(ANALYTICS_OBJ) $(MTESTC_LIB)
+	$(CC) $(CFLAGS) -o test_smart_compress test_smart_compress.o $(SMART_COMPRESS_OBJ) $(ADAPTIVE_OBJ) $(OPTIMIZER_OBJ) $(PARALLEL_OBJ) $(ANALYTICS_OBJ) $(MTESTC_LIB) $(LDFLAGS)
 
 $(TEST_OBJ): $(TEST_SRC)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $(TEST_SRC) -o $(TEST_OBJ)
@@ -62,13 +67,17 @@ $(OPTIMIZER_OBJ): $(OPTIMIZER_SRC)
 $(RECOVERY_OBJ): $(RECOVERY_SRC)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $(RECOVERY_SRC) -o $(RECOVERY_OBJ)
 
+$(SMART_COMPRESS_OBJ): $(SMART_COMPRESS_SRC)
+	$(CC) $(CFLAGS) $(INCLUDES) -c $(SMART_COMPRESS_SRC) -o $(SMART_COMPRESS_OBJ)
+
 clean:
-	rm -f $(OBJS) test_new_features test_complex_features
+	rm -f $(OBJS) test_new_features test_complex_features test_smart_compress
 	$(MAKE) -C $(MTESTC_DIR) clean
 
-test: test_new_features test_complex_features
+test: test_new_features test_complex_features test_smart_compress
 	./test_new_features -v -c
 	./test_complex_features -v -c
+	./test_smart_compress -v -c
 
 .PHONY: all clean test
 
