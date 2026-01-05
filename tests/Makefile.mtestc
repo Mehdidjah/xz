@@ -1,0 +1,74 @@
+# Makefile for building tests with M-testC
+
+CC = gcc
+CFLAGS = -Wall -Wextra -std=c99 -g -O2
+INCLUDES = -I../src/xz -I../src/liblzma/api -I../src/common -I./mtestc
+LDFLAGS = -L../src/liblzma/.libs -llzma -lm
+
+MTESTC_DIR = mtestc
+MTESTC_LIB = $(MTESTC_DIR)/libstest.a
+
+TEST_SRC = test_new_features.c test_complex_features.c
+TEST_OBJ = test_new_features.o test_complex_features.o
+TEST_BIN = test_new_features test_complex_features
+
+# Source files for new features
+ADAPTIVE_SRC = ../src/xz/adaptive.c
+ANALYTICS_SRC = ../src/xz/analytics.c
+INTEGRITY_SRC = ../src/xz/integrity.c
+PARALLEL_SRC = ../src/xz/parallel.c
+OPTIMIZER_SRC = ../src/xz/optimizer.c
+RECOVERY_SRC = ../src/xz/recovery.c
+
+ADAPTIVE_OBJ = adaptive.o
+ANALYTICS_OBJ = analytics.o
+INTEGRITY_OBJ = integrity.o
+PARALLEL_OBJ = parallel.o
+OPTIMIZER_OBJ = optimizer.o
+RECOVERY_OBJ = recovery.o
+
+OBJS = $(TEST_OBJ) $(ADAPTIVE_OBJ) $(ANALYTICS_OBJ) $(INTEGRITY_OBJ) \
+       $(PARALLEL_OBJ) $(OPTIMIZER_OBJ) $(RECOVERY_OBJ)
+
+all: $(MTESTC_LIB) test_new_features test_complex_features
+
+$(MTESTC_LIB):
+	$(MAKE) -C $(MTESTC_DIR)
+
+test_new_features: test_new_features.o $(ADAPTIVE_OBJ) $(ANALYTICS_OBJ) $(INTEGRITY_OBJ) $(MTESTC_LIB)
+	$(CC) $(CFLAGS) -o test_new_features test_new_features.o $(ADAPTIVE_OBJ) $(ANALYTICS_OBJ) $(INTEGRITY_OBJ) $(MTESTC_LIB) $(LDFLAGS)
+
+test_complex_features: test_complex_features.o $(PARALLEL_OBJ) $(OPTIMIZER_OBJ) $(RECOVERY_OBJ) $(ADAPTIVE_OBJ) $(MTESTC_LIB)
+	$(CC) $(CFLAGS) -o test_complex_features test_complex_features.o $(PARALLEL_OBJ) $(OPTIMIZER_OBJ) $(RECOVERY_OBJ) $(ADAPTIVE_OBJ) $(MTESTC_LIB) $(LDFLAGS)
+
+$(TEST_OBJ): $(TEST_SRC)
+	$(CC) $(CFLAGS) $(INCLUDES) -c $(TEST_SRC) -o $(TEST_OBJ)
+
+$(ADAPTIVE_OBJ): $(ADAPTIVE_SRC)
+	$(CC) $(CFLAGS) $(INCLUDES) -c $(ADAPTIVE_SRC) -o $(ADAPTIVE_OBJ)
+
+$(ANALYTICS_OBJ): $(ANALYTICS_SRC)
+	$(CC) $(CFLAGS) $(INCLUDES) -c $(ANALYTICS_SRC) -o $(ANALYTICS_OBJ)
+
+$(INTEGRITY_OBJ): $(INTEGRITY_SRC)
+	$(CC) $(CFLAGS) $(INCLUDES) -c $(INTEGRITY_SRC) -o $(INTEGRITY_OBJ)
+
+$(PARALLEL_OBJ): $(PARALLEL_SRC)
+	$(CC) $(CFLAGS) $(INCLUDES) -c $(PARALLEL_SRC) -o $(PARALLEL_OBJ)
+
+$(OPTIMIZER_OBJ): $(OPTIMIZER_SRC)
+	$(CC) $(CFLAGS) $(INCLUDES) -c $(OPTIMIZER_SRC) -o $(OPTIMIZER_OBJ)
+
+$(RECOVERY_OBJ): $(RECOVERY_SRC)
+	$(CC) $(CFLAGS) $(INCLUDES) -c $(RECOVERY_SRC) -o $(RECOVERY_OBJ)
+
+clean:
+	rm -f $(OBJS) test_new_features test_complex_features
+	$(MAKE) -C $(MTESTC_DIR) clean
+
+test: test_new_features test_complex_features
+	./test_new_features -v -c
+	./test_complex_features -v -c
+
+.PHONY: all clean test
+
