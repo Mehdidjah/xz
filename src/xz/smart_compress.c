@@ -181,6 +181,11 @@ compression_prediction_t smart_compress_predict_file(const char *filename,
 		return prediction;
 	}
 	
+	// Get file size first
+	fseek(file, 0, SEEK_END);
+	long file_size = ftell(file);
+	fseek(file, 0, SEEK_SET);
+	
 	// Read sample (first 1MB)
 	uint8_t *buffer = malloc(1024 * 1024);
 	if (buffer == NULL) {
@@ -191,11 +196,7 @@ compression_prediction_t smart_compress_predict_file(const char *filename,
 	size_t bytes_read = fread(buffer, 1, 1024 * 1024, file);
 	fclose(file);
 	
-	if (bytes_read > 0) {
-		// Get file size
-		fseek(file, 0, SEEK_END);
-		long file_size = ftell(file);
-		fclose(file);
+	if (bytes_read > 0 && file_size > 0) {
 		
 		if (file_size > 0) {
 			// Use prediction with actual file size context
